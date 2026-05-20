@@ -2,6 +2,8 @@ Aplikasi Prediksi Keputusan Pembelian
 
 Aplikasi Streamlit ini memprediksi keputusan pembelian pelanggan berdasarkan teks ulasan. Pipeline mengikuti laporan lama/notebook baseline: preprocessing teks dengan stopword removal dan stemming Sastrawi, TF-IDF untuk ulasan, serta perbandingan Naive Bayes dan Random Forest.
 
+Rating dan price tetap ditampilkan dan dianalisis pada dashboard EDA agar bagian preprocessing/visualisasi laporan tetap terwakili. Keduanya tidak dipaksa masuk ke fitur model utama, sehingga evaluasi tetap konsisten dengan laporan lama yang menempatkan Naive Bayes sebagai model terbaik.
+
 Model utama yang digunakan untuk laporan dan dashboard adalah Naive Bayes. Random Forest tetap disediakan sebagai model pembanding.
 
 Struktur Folder
@@ -56,7 +58,8 @@ streamlit run app.py
 
 Dashboard memiliki dua halaman:
 
-- `Prediksi`: memasukkan ulasan lalu memilih model.
+- `Prediksi`: memasukkan ulasan, rating, price, lalu memilih model. Prediksi model memakai fitur teks ulasan.
+- `EDA Rating & Price`: menampilkan distribusi rating, distribusi price, korelasi, dan ringkasan per kelas keputusan.
 - `Evaluasi Model`: menampilkan metrik, confusion matrix, classification report, dan cross-validation dari `models/evaluation_results.json`.
 
 Catatan Laporan

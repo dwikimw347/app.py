@@ -2,9 +2,12 @@ import json
 from pathlib import Path
 
 import joblib
+import numpy as np
 import pandas as pd
 import streamlit as st
 
+from export_models import load_dataset
+from feature_engineering import parse_price, parse_rating
 from preprocessing import preprocess_text
 
 
@@ -40,6 +43,17 @@ def load_evaluation():
     if not EVALUATION_PATH.exists():
         return None
     return json.loads(EVALUATION_PATH.read_text(encoding="utf-8"))
+
+
+@st.cache_data
+def load_eda_data():
+    df = load_dataset()
+    df = df.copy()
+    df["rating_numeric"] = df["Rating"].apply(parse_rating)
+    df["price_numeric"] = df["price"].apply(parse_price)
+    df["target_label"] = df["purchase_decision"].astype(str).str.strip().str.upper()
+    df["target_numeric"] = df["target_label"].isin({"Y", "YA", "YES", "BELI", "1", "TRUE"}).astype(int)
+    return df.dropna(subset=["rating_numeric", "price_numeric"])
 
 
 def prediction_label(value) -> str:
@@ -79,12 +93,18 @@ def render_prediction_page(vectorizer, model_options):
     example_reviews = {
         "Ulasan positif": {
             "review": "Rasanya enak, pengiriman cepat, packing aman, saya mau beli lagi.",
+            "rating": 5.0,
+            "price": 3400.0,
         },
         "Ulasan negatif": {
             "review": "Barang kurang sesuai, rasanya tidak enak, pengiriman lama dan mengecewakan.",
+            "rating": 2.0,
+            "price": 3400.0,
         },
         "Ulasan netral": {
             "review": "Produk sudah sampai, kemasan cukup baik, rasanya lumayan sesuai harga.",
+            "rating": 4.0,
+            "price": 11500.0,
         },
     }
 
@@ -96,6 +116,20 @@ def render_prediction_page(vectorizer, model_options):
         "Masukkan teks ulasan pelanggan",
         value=example["review"],
         height=150,
+    )
+    col_rating, col_price = st.columns(2)
+    rating_value = col_rating.slider(
+        "Rating",
+        min_value=1.0,
+        max_value=5.0,
+        value=example["rating"],
+        step=0.5,
+    )
+    price_value = col_price.number_input(
+        "Price (Rp)",
+        min_value=0.0,
+        value=example["price"],
+        step=500.0,
     )
 
     if st.button("Prediksi", type="primary", use_container_width=True):
@@ -123,12 +157,73 @@ def render_prediction_page(vectorizer, model_options):
                 [
                     {
                         "Review setelah preprocessing": processed_text or "(kosong)",
+                        "Rating": rating_value,
+                        "Price": price_value,
+                        "Fitur model": "Review TF-IDF",
                     }
                 ]
             ),
             hide_index=True,
             use_container_width=True,
         )
+
+
+def render_eda_page():
+    st.title("EDA Rating & Price")
+    try:
+        df = load_eda_data()
+    except Exception as exc:
+        st.error(f"Dataset tidak bisa dimuat: {exc}")
+        return
+
+    col_rows, col_rating, col_price, col_corr = st.columns(4)
+    col_rows.metric("Jumlah Data", f"{len(df):,}")
+    col_rating.metric("Median Rating", f"{df['rating_numeric'].median():.1f}")
+    col_price.metric("Median Price", f"Rp{df['price_numeric'].median():,.0f}")
+    corr_value = df[["rating_numeric", "price_numeric", "target_numeric"]].corr().loc[
+        "rating_numeric",
+        "target_numeric",
+    ]
+    col_corr.metric("Korelasi Rating-Target", f"{corr_value:.2f}")
+
+    st.subheader("Distribusi Rating")
+    rating_counts = (
+        df["rating_numeric"]
+        .round()
+        .astype(int)
+        .value_counts()
+        .sort_index()
+        .rename_axis("Rating")
+        .reset_index(name="Jumlah")
+    )
+    st.bar_chart(rating_counts, x="Rating", y="Jumlah")
+
+    st.subheader("Distribusi Price")
+    price_bins = pd.cut(
+        df["price_numeric"],
+        bins=[0, 10000, 30000, 50000, 100000, np.inf],
+        labels=["0-10rb", "10-30rb", "30-50rb", "50-100rb", ">100rb"],
+        include_lowest=True,
+    )
+    price_counts = price_bins.value_counts().sort_index().rename_axis("Rentang Price").reset_index(name="Jumlah")
+    st.bar_chart(price_counts, x="Rentang Price", y="Jumlah")
+
+    st.subheader("Heatmap Korelasi")
+    corr = df[["rating_numeric", "price_numeric", "target_numeric"]].corr()
+    st.dataframe(corr.style.format("{:.2f}"), use_container_width=True)
+
+    st.subheader("Ringkasan per Keputusan Pembelian")
+    summary = (
+        df.groupby("target_numeric")
+        .agg(
+            jumlah=("target_numeric", "size"),
+            rata_rata_rating=("rating_numeric", "mean"),
+            median_price=("price_numeric", "median"),
+            rata_rata_price=("price_numeric", "mean"),
+        )
+        .rename(index={0: "TIDAK BELI", 1: "BELI"})
+    )
+    st.dataframe(summary.style.format("{:,.2f}"), use_container_width=True)
 
 
 def best_results_table(evaluation):
@@ -241,9 +336,11 @@ except FileNotFoundError as exc:
     st.error(str(exc))
     st.stop()
 
-page = st.sidebar.radio("Menu", ["Prediksi", "Evaluasi Model"])
+page = st.sidebar.radio("Menu", ["Prediksi", "EDA Rating & Price", "Evaluasi Model"])
 
 if page == "Prediksi":
     render_prediction_page(vectorizer, model_options)
+elif page == "EDA Rating & Price":
+    render_eda_page()
 else:
     render_evaluation_page()

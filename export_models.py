@@ -298,6 +298,7 @@ def save_evaluation(best_results, all_results, dataset_info):
         "generated_at": datetime.now().isoformat(timespec="seconds"),
         "main_model": MAIN_MODEL,
         "feature_set": ["Review TF-IDF"],
+        "analysis_features": ["Rating", "price"],
         "preprocessing": [
             "case folding",
             "cleaning URL/simbol/angka",
