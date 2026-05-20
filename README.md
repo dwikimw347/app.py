@@ -1,10 +1,8 @@
 Aplikasi Prediksi Keputusan Pembelian
 
-Aplikasi Streamlit ini memprediksi keputusan pembelian pelanggan berdasarkan teks ulasan. Pipeline mengikuti laporan lama/notebook baseline: preprocessing teks dengan stopword removal dan stemming Sastrawi, TF-IDF untuk ulasan, serta perbandingan Naive Bayes dan Random Forest.
+Aplikasi Streamlit ini digunakan untuk menganalisis ulasan pelanggan dan memprediksi keputusan pembelian produk. Model prediksi menggunakan teks ulasan yang diproses dengan preprocessing Bahasa Indonesia, TF-IDF, serta dua algoritma klasifikasi: Naive Bayes sebagai model utama dan Random Forest sebagai model pembanding.
 
-Rating dan price tetap ditampilkan dan dianalisis pada dashboard EDA agar bagian preprocessing/visualisasi laporan tetap terwakili. Keduanya tidak dipaksa masuk ke fitur model utama, sehingga evaluasi tetap konsisten dengan laporan lama yang menempatkan Naive Bayes sebagai model terbaik.
-
-Model utama yang digunakan untuk laporan dan dashboard adalah Naive Bayes. Random Forest tetap disediakan sebagai model pembanding.
+Dashboard juga menyediakan analisis rating dan price untuk mendukung tahap EDA, seperti distribusi rating, distribusi harga, korelasi, dan ringkasan per kelas keputusan pembelian.
 
 Struktur Folder
 
@@ -12,6 +10,7 @@ Struktur Folder
 .
 +-- app.py
 +-- export_models.py
++-- feature_engineering.py
 +-- preprocessing.py
 +-- requirements.txt
 +-- README.md
@@ -35,7 +34,7 @@ pip install -r requirements.txt
 
 Export Model dan Evaluasi
 
-Jalankan ulang export setiap kali preprocessing, fitur, atau dataset berubah:
+Jalankan ulang export setiap kali preprocessing, dataset, atau konfigurasi model berubah:
 
 ```bash
 python export_models.py
@@ -45,7 +44,7 @@ Script akan:
 
 - membaca dataset `.xlsx` jika tersedia, atau `.csv` jika tidak;
 - memakai fitur teks `Review`/`Review_Tokenized`;
-- melakukan stopword removal dan stemming;
+- melakukan case folding, cleaning, stopword removal, dan stemming;
 - membentuk fitur TF-IDF dengan 5000 fitur unigram dan bigram;
 - melatih Naive Bayes dan Random Forest;
 - menyimpan model serta file evaluasi ke folder `models/`.
@@ -56,12 +55,12 @@ Menjalankan Aplikasi
 streamlit run app.py
 ```
 
-Dashboard memiliki dua halaman:
+Menu Dashboard
 
-- `Prediksi`: memasukkan ulasan, rating, price, lalu memilih model. Prediksi model memakai fitur teks ulasan.
+- `Prediksi`: memasukkan ulasan, rating, dan price. Prediksi model menggunakan teks ulasan.
 - `EDA Rating & Price`: menampilkan distribusi rating, distribusi price, korelasi, dan ringkasan per kelas keputusan.
 - `Evaluasi Model`: menampilkan metrik, confusion matrix, classification report, dan cross-validation dari `models/evaluation_results.json`.
 
-Catatan Laporan
+Model Utama
 
-Angka evaluasi di laporan PDF sebaiknya disamakan dengan isi terbaru `models/evaluation_results.json` setelah `python export_models.py` dijalankan.
+Naive Bayes digunakan sebagai model utama karena memberikan F1-score dan recall terbaik pada pipeline evaluasi berbasis TF-IDF. Random Forest disediakan sebagai pembanding untuk melihat perbedaan performa antar algoritma.

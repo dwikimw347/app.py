@@ -2,8 +2,6 @@ streamlit
 pandas
 numpy
 scikit-learn
-scipy
-imbalanced-learn
 joblib
 openpyxl
 Sastrawi

@@ -13,7 +13,6 @@ from preprocessing import preprocess_text
 
 MODEL_DIR = Path("models")
 VECTORIZER_PATH = MODEL_DIR / "tfidf_vectorizer.pkl"
-SCALER_PATH = MODEL_DIR / "feature_scaler.pkl"
 RF_MODEL_PATH = MODEL_DIR / "random_forest_model.pkl"
 NB_MODEL_PATH = MODEL_DIR / "naive_bayes_model.pkl"
 EVALUATION_PATH = MODEL_DIR / "evaluation_results.json"

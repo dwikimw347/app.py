@@ -2,10 +2,6 @@ import re
 
 import numpy as np
 import pandas as pd
-from scipy.sparse import csr_matrix, hstack
-
-
-NUMERIC_FEATURE_NAMES = ["rating", "price_log"]
 
 
 def parse_rating(value) -> float:
@@ -48,40 +44,3 @@ def parse_price(value) -> float:
 
     digits = re.sub(r"\D", "", text)
     return float(digits) if digits else np.nan
-
-
-def make_numeric_frame(ratings, prices) -> pd.DataFrame:
-    rating = pd.Series(ratings).apply(parse_rating).clip(lower=1, upper=5)
-    price = pd.Series(prices).apply(parse_price).clip(lower=0)
-    return pd.DataFrame(
-        {
-            "rating": rating,
-            "price_log": np.log1p(price),
-        }
-    )
-
-
-def build_feature_matrix(
-    texts,
-    ratings,
-    prices,
-    vectorizer,
-    scaler,
-    fit_vectorizer=False,
-    fit_scaler=False,
-):
-    if fit_vectorizer:
-        text_features = vectorizer.fit_transform(texts)
-    else:
-        text_features = vectorizer.transform(texts)
-
-    numeric_frame = make_numeric_frame(ratings, prices)
-    if numeric_frame.isna().any().any():
-        raise ValueError("Rating dan price wajib valid untuk membentuk fitur model.")
-
-    if fit_scaler:
-        numeric_features = scaler.fit_transform(numeric_frame)
-    else:
-        numeric_features = scaler.transform(numeric_frame)
-
-    return hstack([text_features, csr_matrix(numeric_features)], format="csr")
