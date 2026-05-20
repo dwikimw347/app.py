@@ -1,0 +1,742 @@
+{
+  "generated_at": "2026-05-20T16:24:24",
+  "main_model": "Random Forest",
+  "feature_set": [
+    "Review TF-IDF",
+    "Rating",
+    "Price log1p"
+  ],
+  "preprocessing": [
+    "case folding",
+    "cleaning URL/simbol/angka",
+    "tokenizing",
+    "stopword removal dengan negasi dipertahankan",
+    "stemming Sastrawi"
+  ],
+  "split": {
+    "train": "80%",
+    "test": "20%",
+    "random_state": 42
+  },
+  "imbalance_handling": {
+    "method": "SMOTE",
+    "applied_to": "training set setelah split",
+    "random_state": 42
+  },
+  "dataset": {
+    "source_rows": 9294,
+    "valid_rows": 9294,
+    "text_column": "Review_Tokenized",
+    "rating_column": "Rating",
+    "price_column": "price",
+    "target_column": "purchase_decision",
+    "matrix_shape": [
+      9294,
+      5002
+    ],
+    "train_shape_before_smote": [
+      7435,
+      5002
+    ],
+    "train_shape_after_smote": [
+      13134,
+      5002
+    ],
+    "test_shape": [
+      1859,
+      5002
+    ]
+  },
+  "best_results": {
+    "Random Forest": {
+      "family": "Random Forest",
+      "model": "RF (n=100, depth=None)",
+      "parameters": {
+        "n_estimators": 100,
+        "max_depth": null
+      },
+      "accuracy": 0.9548144163528779,
+      "precision": 0.9746682750301568,
+      "recall": 0.9746682750301568,
+      "f1_score": 0.9746682750301568,
+      "auc_roc": 0.9706368639312484,
+      "confusion_matrix": {
+        "tn": 159,
+        "fp": 42,
+        "fn": 42,
+        "tp": 1616
+      },
+      "classification_report": {
+        "Tidak Beli (N)": {
+          "precision": 0.7910447761194029,
+          "recall": 0.7910447761194029,
+          "f1-score": 0.7910447761194029,
+          "support": 201.0
+        },
+        "Beli (Y)": {
+          "precision": 0.9746682750301568,
+          "recall": 0.9746682750301568,
+          "f1-score": 0.9746682750301568,
+          "support": 1658.0
+        },
+        "accuracy": 0.9548144163528779,
+        "macro avg": {
+          "precision": 0.8828565255747799,
+          "recall": 0.8828565255747799,
+          "f1-score": 0.8828565255747799,
+          "support": 1859.0
+        },
+        "weighted avg": {
+          "precision": 0.9548144163528779,
+          "recall": 0.9548144163528779,
+          "f1-score": 0.9548144163528779,
+          "support": 1859.0
+        }
+      },
+      "cross_validation": {
+        "scores": [
+          0.9757412398921833,
+          0.9834932821497121,
+          0.9800460475825019,
+          0.9752895752895753,
+          0.9834168916313151
+        ],
+        "mean": 0.9795974073090576,
+        "std": 0.003560758998079248
+      }
+    },
+    "Naive Bayes": {
+      "family": "Naive Bayes",
+      "model": "Multinomial NB (alpha=0.1)",
+      "parameters": {
+        "variant": "MultinomialNB",
+        "alpha": 0.1
+      },
+      "accuracy": 0.893491124260355,
+      "precision": 0.9727979274611399,
+      "recall": 0.9059107358262968,
+      "f1_score": 0.9381636477201749,
+      "auc_roc": 0.9406165793469325,
+      "confusion_matrix": {
+        "tn": 159,
+        "fp": 42,
+        "fn": 156,
+        "tp": 1502
+      },
+      "classification_report": {
+        "Tidak Beli (N)": {
+          "precision": 0.5047619047619047,
+          "recall": 0.7910447761194029,
+          "f1-score": 0.6162790697674418,
+          "support": 201.0
+        },
+        "Beli (Y)": {
+          "precision": 0.9727979274611399,
+          "recall": 0.9059107358262968,
+          "f1-score": 0.9381636477201749,
+          "support": 1658.0
+        },
+        "accuracy": 0.893491124260355,
+        "macro avg": {
+          "precision": 0.7387799161115223,
+          "recall": 0.8484777559728498,
+          "f1-score": 0.7772213587438084,
+          "support": 1859.0
+        },
+        "weighted avg": {
+          "precision": 0.9221926339901628,
+          "recall": 0.893491124260355,
+          "f1-score": 0.9033606352572919,
+          "support": 1859.0
+        }
+      },
+      "cross_validation": {
+        "scores": [
+          0.9443363176333204,
+          0.9458511881573821,
+          0.9381362568519969,
+          0.9400157853196527,
+          0.9420062695924765
+        ],
+        "mean": 0.9420691635109657,
+        "std": 0.002797562176978924
+      }
+    }
+  },
+  "all_experiments": [
+    {
+      "family": "Naive Bayes",
+      "model": "Multinomial NB (alpha=0.1)",
+      "parameters": {
+        "variant": "MultinomialNB",
+        "alpha": 0.1
+      },
+      "accuracy": 0.893491124260355,
+      "precision": 0.9727979274611399,
+      "recall": 0.9059107358262968,
+      "f1_score": 0.9381636477201749,
+      "auc_roc": 0.9406165793469325,
+      "confusion_matrix": {
+        "tn": 159,
+        "fp": 42,
+        "fn": 156,
+        "tp": 1502
+      },
+      "classification_report": {
+        "Tidak Beli (N)": {
+          "precision": 0.5047619047619047,
+          "recall": 0.7910447761194029,
+          "f1-score": 0.6162790697674418,
+          "support": 201.0
+        },
+        "Beli (Y)": {
+          "precision": 0.9727979274611399,
+          "recall": 0.9059107358262968,
+          "f1-score": 0.9381636477201749,
+          "support": 1658.0
+        },
+        "accuracy": 0.893491124260355,
+        "macro avg": {
+          "precision": 0.7387799161115223,
+          "recall": 0.8484777559728498,
+          "f1-score": 0.7772213587438084,
+          "support": 1859.0
+        },
+        "weighted avg": {
+          "precision": 0.9221926339901628,
+          "recall": 0.893491124260355,
+          "f1-score": 0.9033606352572919,
+          "support": 1859.0
+        }
+      },
+      "cross_validation": {
+        "scores": [
+          0.9443363176333204,
+          0.9458511881573821,
+          0.9381362568519969,
+          0.9400157853196527,
+          0.9420062695924765
+        ],
+        "mean": 0.9420691635109657,
+        "std": 0.002797562176978924
+      }
+    },
+    {
+      "family": "Naive Bayes",
+      "model": "Multinomial NB (alpha=0.5)",
+      "parameters": {
+        "variant": "MultinomialNB",
+        "alpha": 0.5
+      },
+      "accuracy": 0.8757396449704142,
+      "precision": 0.9817690749493585,
+      "recall": 0.8769601930036188,
+      "f1_score": 0.926409684612934,
+      "auc_roc": 0.9499426870472727,
+      "confusion_matrix": {
+        "tn": 174,
+        "fp": 27,
+        "fn": 204,
+        "tp": 1454
+      },
+      "classification_report": {
+        "Tidak Beli (N)": {
+          "precision": 0.4603174603174603,
+          "recall": 0.8656716417910447,
+          "f1-score": 0.6010362694300518,
+          "support": 201.0
+        },
+        "Beli (Y)": {
+          "precision": 0.9817690749493585,
+          "recall": 0.8769601930036188,
+          "f1-score": 0.926409684612934,
+          "support": 1658.0
+        },
+        "accuracy": 0.8757396449704142,
+        "macro avg": {
+          "precision": 0.7210432676334094,
+          "recall": 0.8713159173973317,
+          "f1-score": 0.7637229770214929,
+          "support": 1859.0
+        },
+        "weighted avg": {
+          "precision": 0.9253883463097612,
+          "recall": 0.8757396449704142,
+          "f1-score": 0.8912294498352259,
+          "support": 1859.0
+        }
+      }
+    },
+    {
+      "family": "Naive Bayes",
+      "model": "Multinomial NB (alpha=1.0)",
+      "parameters": {
+        "variant": "MultinomialNB",
+        "alpha": 1.0
+      },
+      "accuracy": 0.8757396449704142,
+      "precision": 0.9857045609257998,
+      "recall": 0.873341375150784,
+      "f1_score": 0.9261272785417333,
+      "auc_roc": 0.9526703034885885,
+      "confusion_matrix": {
+        "tn": 180,
+        "fp": 21,
+        "fn": 210,
+        "tp": 1448
+      },
+      "classification_report": {
+        "Tidak Beli (N)": {
+          "precision": 0.46153846153846156,
+          "recall": 0.8955223880597015,
+          "f1-score": 0.6091370558375635,
+          "support": 201.0
+        },
+        "Beli (Y)": {
+          "precision": 0.9857045609257998,
+          "recall": 0.873341375150784,
+          "f1-score": 0.9261272785417333,
+          "support": 1658.0
+        },
+        "accuracy": 0.8757396449704142,
+        "macro avg": {
+          "precision": 0.7236215112321307,
+          "recall": 0.8844318816052428,
+          "f1-score": 0.7676321671896484,
+          "support": 1859.0
+        },
+        "weighted avg": {
+          "precision": 0.9290303350103317,
+          "recall": 0.8757396449704142,
+          "f1-score": 0.8918534567216482,
+          "support": 1859.0
+        }
+      }
+    },
+    {
+      "family": "Naive Bayes",
+      "model": "Complement NB (alpha=0.1)",
+      "parameters": {
+        "variant": "ComplementNB",
+        "alpha": 0.1
+      },
+      "accuracy": 0.893491124260355,
+      "precision": 0.9727979274611399,
+      "recall": 0.9059107358262968,
+      "f1_score": 0.9381636477201749,
+      "auc_roc": 0.9406165793469325,
+      "confusion_matrix": {
+        "tn": 159,
+        "fp": 42,
+        "fn": 156,
+        "tp": 1502
+      },
+      "classification_report": {
+        "Tidak Beli (N)": {
+          "precision": 0.5047619047619047,
+          "recall": 0.7910447761194029,
+          "f1-score": 0.6162790697674418,
+          "support": 201.0
+        },
+        "Beli (Y)": {
+          "precision": 0.9727979274611399,
+          "recall": 0.9059107358262968,
+          "f1-score": 0.9381636477201749,
+          "support": 1658.0
+        },
+        "accuracy": 0.893491124260355,
+        "macro avg": {
+          "precision": 0.7387799161115223,
+          "recall": 0.8484777559728498,
+          "f1-score": 0.7772213587438084,
+          "support": 1859.0
+        },
+        "weighted avg": {
+          "precision": 0.9221926339901628,
+          "recall": 0.893491124260355,
+          "f1-score": 0.9033606352572919,
+          "support": 1859.0
+        }
+      }
+    },
+    {
+      "family": "Naive Bayes",
+      "model": "Complement NB (alpha=0.5)",
+      "parameters": {
+        "variant": "ComplementNB",
+        "alpha": 0.5
+      },
+      "accuracy": 0.8757396449704142,
+      "precision": 0.9817690749493585,
+      "recall": 0.8769601930036188,
+      "f1_score": 0.926409684612934,
+      "auc_roc": 0.9499426870472727,
+      "confusion_matrix": {
+        "tn": 174,
+        "fp": 27,
+        "fn": 204,
+        "tp": 1454
+      },
+      "classification_report": {
+        "Tidak Beli (N)": {
+          "precision": 0.4603174603174603,
+          "recall": 0.8656716417910447,
+          "f1-score": 0.6010362694300518,
+          "support": 201.0
+        },
+        "Beli (Y)": {
+          "precision": 0.9817690749493585,
+          "recall": 0.8769601930036188,
+          "f1-score": 0.926409684612934,
+          "support": 1658.0
+        },
+        "accuracy": 0.8757396449704142,
+        "macro avg": {
+          "precision": 0.7210432676334094,
+          "recall": 0.8713159173973317,
+          "f1-score": 0.7637229770214929,
+          "support": 1859.0
+        },
+        "weighted avg": {
+          "precision": 0.9253883463097612,
+          "recall": 0.8757396449704142,
+          "f1-score": 0.8912294498352259,
+          "support": 1859.0
+        }
+      }
+    },
+    {
+      "family": "Naive Bayes",
+      "model": "Complement NB (alpha=1.0)",
+      "parameters": {
+        "variant": "ComplementNB",
+        "alpha": 1.0
+      },
+      "accuracy": 0.8757396449704142,
+      "precision": 0.9857045609257998,
+      "recall": 0.873341375150784,
+      "f1_score": 0.9261272785417333,
+      "auc_roc": 0.9526703034885885,
+      "confusion_matrix": {
+        "tn": 180,
+        "fp": 21,
+        "fn": 210,
+        "tp": 1448
+      },
+      "classification_report": {
+        "Tidak Beli (N)": {
+          "precision": 0.46153846153846156,
+          "recall": 0.8955223880597015,
+          "f1-score": 0.6091370558375635,
+          "support": 201.0
+        },
+        "Beli (Y)": {
+          "precision": 0.9857045609257998,
+          "recall": 0.873341375150784,
+          "f1-score": 0.9261272785417333,
+          "support": 1658.0
+        },
+        "accuracy": 0.8757396449704142,
+        "macro avg": {
+          "precision": 0.7236215112321307,
+          "recall": 0.8844318816052428,
+          "f1-score": 0.7676321671896484,
+          "support": 1859.0
+        },
+        "weighted avg": {
+          "precision": 0.9290303350103317,
+          "recall": 0.8757396449704142,
+          "f1-score": 0.8918534567216482,
+          "support": 1859.0
+        }
+      }
+    },
+    {
+      "family": "Random Forest",
+      "model": "RF (n=100, depth=None)",
+      "parameters": {
+        "n_estimators": 100,
+        "max_depth": null
+      },
+      "accuracy": 0.9548144163528779,
+      "precision": 0.9746682750301568,
+      "recall": 0.9746682750301568,
+      "f1_score": 0.9746682750301568,
+      "auc_roc": 0.9706368639312484,
+      "confusion_matrix": {
+        "tn": 159,
+        "fp": 42,
+        "fn": 42,
+        "tp": 1616
+      },
+      "classification_report": {
+        "Tidak Beli (N)": {
+          "precision": 0.7910447761194029,
+          "recall": 0.7910447761194029,
+          "f1-score": 0.7910447761194029,
+          "support": 201.0
+        },
+        "Beli (Y)": {
+          "precision": 0.9746682750301568,
+          "recall": 0.9746682750301568,
+          "f1-score": 0.9746682750301568,
+          "support": 1658.0
+        },
+        "accuracy": 0.9548144163528779,
+        "macro avg": {
+          "precision": 0.8828565255747799,
+          "recall": 0.8828565255747799,
+          "f1-score": 0.8828565255747799,
+          "support": 1859.0
+        },
+        "weighted avg": {
+          "precision": 0.9548144163528779,
+          "recall": 0.9548144163528779,
+          "f1-score": 0.9548144163528779,
+          "support": 1859.0
+        }
+      },
+      "cross_validation": {
+        "scores": [
+          0.9757412398921833,
+          0.9834932821497121,
+          0.9800460475825019,
+          0.9752895752895753,
+          0.9834168916313151
+        ],
+        "mean": 0.9795974073090576,
+        "std": 0.003560758998079248
+      }
+    },
+    {
+      "family": "Random Forest",
+      "model": "RF (n=100, depth=10)",
+      "parameters": {
+        "n_estimators": 100,
+        "max_depth": 10
+      },
+      "accuracy": 0.9359870898332436,
+      "precision": 0.978247358607831,
+      "recall": 0.9493365500603136,
+      "f1_score": 0.9635751453933272,
+      "auc_roc": 0.961490796920104,
+      "confusion_matrix": {
+        "tn": 166,
+        "fp": 35,
+        "fn": 84,
+        "tp": 1574
+      },
+      "classification_report": {
+        "Tidak Beli (N)": {
+          "precision": 0.664,
+          "recall": 0.8258706467661692,
+          "f1-score": 0.7361419068736141,
+          "support": 201.0
+        },
+        "Beli (Y)": {
+          "precision": 0.978247358607831,
+          "recall": 0.9493365500603136,
+          "f1-score": 0.9635751453933272,
+          "support": 1658.0
+        },
+        "accuracy": 0.9359870898332436,
+        "macro avg": {
+          "precision": 0.8211236793039155,
+          "recall": 0.8876035984132413,
+          "f1-score": 0.8498585261334707,
+          "support": 1859.0
+        },
+        "weighted avg": {
+          "precision": 0.9442701025130628,
+          "recall": 0.9359870898332436,
+          "f1-score": 0.9389844617233637,
+          "support": 1859.0
+        }
+      }
+    },
+    {
+      "family": "Random Forest",
+      "model": "RF (n=100, depth=20)",
+      "parameters": {
+        "n_estimators": 100,
+        "max_depth": 20
+      },
+      "accuracy": 0.9408284023668639,
+      "precision": 0.9771886559802713,
+      "recall": 0.9559710494571774,
+      "f1_score": 0.9664634146341463,
+      "auc_roc": 0.9661688541610403,
+      "confusion_matrix": {
+        "tn": 164,
+        "fp": 37,
+        "fn": 73,
+        "tp": 1585
+      },
+      "classification_report": {
+        "Tidak Beli (N)": {
+          "precision": 0.6919831223628692,
+          "recall": 0.8159203980099502,
+          "f1-score": 0.7488584474885844,
+          "support": 201.0
+        },
+        "Beli (Y)": {
+          "precision": 0.9771886559802713,
+          "recall": 0.9559710494571774,
+          "f1-score": 0.9664634146341463,
+          "support": 1658.0
+        },
+        "accuracy": 0.9408284023668639,
+        "macro avg": {
+          "precision": 0.8345858891715703,
+          "recall": 0.8859457237335637,
+          "f1-score": 0.8576609310613654,
+          "support": 1859.0
+        },
+        "weighted avg": {
+          "precision": 0.9463514788651031,
+          "recall": 0.9408284023668639,
+          "f1-score": 0.9429353896765035,
+          "support": 1859.0
+        }
+      }
+    },
+    {
+      "family": "Random Forest",
+      "model": "RF (n=200, depth=None)",
+      "parameters": {
+        "n_estimators": 200,
+        "max_depth": null
+      },
+      "accuracy": 0.9526627218934911,
+      "precision": 0.9734620024125452,
+      "recall": 0.9734620024125452,
+      "f1_score": 0.9734620024125452,
+      "auc_roc": 0.9720261779162092,
+      "confusion_matrix": {
+        "tn": 157,
+        "fp": 44,
+        "fn": 44,
+        "tp": 1614
+      },
+      "classification_report": {
+        "Tidak Beli (N)": {
+          "precision": 0.7810945273631841,
+          "recall": 0.7810945273631841,
+          "f1-score": 0.7810945273631841,
+          "support": 201.0
+        },
+        "Beli (Y)": {
+          "precision": 0.9734620024125452,
+          "recall": 0.9734620024125452,
+          "f1-score": 0.9734620024125452,
+          "support": 1658.0
+        },
+        "accuracy": 0.9526627218934911,
+        "macro avg": {
+          "precision": 0.8772782648878646,
+          "recall": 0.8772782648878646,
+          "f1-score": 0.8772782648878646,
+          "support": 1859.0
+        },
+        "weighted avg": {
+          "precision": 0.9526627218934911,
+          "recall": 0.9526627218934911,
+          "f1-score": 0.9526627218934911,
+          "support": 1859.0
+        }
+      }
+    },
+    {
+      "family": "Random Forest",
+      "model": "RF (n=200, depth=10)",
+      "parameters": {
+        "n_estimators": 200,
+        "max_depth": 10
+      },
+      "accuracy": 0.9322216245293168,
+      "precision": 0.9757763975155279,
+      "recall": 0.9475271411338962,
+      "f1_score": 0.9614443084455324,
+      "auc_roc": 0.9614847955637975,
+      "confusion_matrix": {
+        "tn": 162,
+        "fp": 39,
+        "fn": 87,
+        "tp": 1571
+      },
+      "classification_report": {
+        "Tidak Beli (N)": {
+          "precision": 0.6506024096385542,
+          "recall": 0.8059701492537313,
+          "f1-score": 0.72,
+          "support": 201.0
+        },
+        "Beli (Y)": {
+          "precision": 0.9757763975155279,
+          "recall": 0.9475271411338962,
+          "f1-score": 0.9614443084455324,
+          "support": 1658.0
+        },
+        "accuracy": 0.9322216245293168,
+        "macro avg": {
+          "precision": 0.8131894035770411,
+          "recall": 0.8767486451938138,
+          "f1-score": 0.8407221542227662,
+          "support": 1859.0
+        },
+        "weighted avg": {
+          "precision": 0.9406177253459358,
+          "recall": 0.9322216245293168,
+          "f1-score": 0.9353387108137131,
+          "support": 1859.0
+        }
+      }
+    },
+    {
+      "family": "Random Forest",
+      "model": "RF (n=200, depth=20)",
+      "parameters": {
+        "n_estimators": 200,
+        "max_depth": 20
+      },
+      "accuracy": 0.9408284023668639,
+      "precision": 0.9742647058823529,
+      "recall": 0.9589867310012062,
+      "f1_score": 0.9665653495440729,
+      "auc_roc": 0.9655462134442383,
+      "confusion_matrix": {
+        "tn": 159,
+        "fp": 42,
+        "fn": 68,
+        "tp": 1590
+      },
+      "classification_report": {
+        "Tidak Beli (N)": {
+          "precision": 0.7004405286343612,
+          "recall": 0.7910447761194029,
+          "f1-score": 0.7429906542056075,
+          "support": 201.0
+        },
+        "Beli (Y)": {
+          "precision": 0.9742647058823529,
+          "recall": 0.9589867310012062,
+          "f1-score": 0.9665653495440729,
+          "support": 1658.0
+        },
+        "accuracy": 0.9408284023668639,
+        "macro avg": {
+          "precision": 0.8373526172583571,
+          "recall": 0.8750157535603046,
+          "f1-score": 0.8547780018748402,
+          "support": 1859.0
+        },
+        "weighted avg": {
+          "precision": 0.9446581111395631,
+          "recall": 0.9408284023668639,
+          "f1-score": 0.9423918617748251,
+          "support": 1859.0
+        }
+      }
+    }
+  ]
+}
