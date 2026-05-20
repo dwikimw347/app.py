@@ -5,7 +5,6 @@ import joblib
 import pandas as pd
 import streamlit as st
 
-from feature_engineering import build_feature_matrix
 from preprocessing import preprocess_text
 
 
@@ -19,7 +18,7 @@ EVALUATION_PATH = MODEL_DIR / "evaluation_results.json"
 
 @st.cache_resource
 def load_artifacts():
-    required_paths = [VECTORIZER_PATH, SCALER_PATH, RF_MODEL_PATH, NB_MODEL_PATH]
+    required_paths = [VECTORIZER_PATH, RF_MODEL_PATH, NB_MODEL_PATH]
     missing = [str(path) for path in required_paths if not path.exists()]
     if missing:
         raise FileNotFoundError(
@@ -29,12 +28,11 @@ def load_artifacts():
         )
 
     vectorizer = joblib.load(VECTORIZER_PATH)
-    scaler = joblib.load(SCALER_PATH)
     models = {
-        "Random Forest (Model Utama)": joblib.load(RF_MODEL_PATH),
-        "Naive Bayes (Pembanding)": joblib.load(NB_MODEL_PATH),
+        "Naive Bayes (Model Utama)": joblib.load(NB_MODEL_PATH),
+        "Random Forest (Pembanding)": joblib.load(RF_MODEL_PATH),
     }
-    return vectorizer, scaler, models
+    return vectorizer, models
 
 
 @st.cache_data
@@ -75,24 +73,18 @@ def format_metric(value):
     return f"{float(value):.4f}"
 
 
-def render_prediction_page(vectorizer, scaler, model_options):
+def render_prediction_page(vectorizer, model_options):
     st.title("Prediksi Keputusan Pembelian")
 
     example_reviews = {
         "Ulasan positif": {
             "review": "Rasanya enak, pengiriman cepat, packing aman, saya mau beli lagi.",
-            "rating": 5.0,
-            "price": 3400.0,
         },
         "Ulasan negatif": {
             "review": "Barang kurang sesuai, rasanya tidak enak, pengiriman lama dan mengecewakan.",
-            "rating": 2.0,
-            "price": 3400.0,
         },
         "Ulasan netral": {
             "review": "Produk sudah sampai, kemasan cukup baik, rasanya lumayan sesuai harga.",
-            "rating": 4.0,
-            "price": 11500.0,
         },
     }
 
@@ -106,34 +98,13 @@ def render_prediction_page(vectorizer, scaler, model_options):
         height=150,
     )
 
-    col_rating, col_price = st.columns(2)
-    rating_value = col_rating.slider(
-        "Rating",
-        min_value=1.0,
-        max_value=5.0,
-        value=example["rating"],
-        step=0.5,
-    )
-    price_value = col_price.number_input(
-        "Price (Rp)",
-        min_value=0.0,
-        value=example["price"],
-        step=500.0,
-    )
-
     if st.button("Prediksi", type="primary", use_container_width=True):
         if not review_text.strip():
             st.warning("Masukkan teks ulasan terlebih dahulu.")
             st.stop()
 
         processed_text = preprocess_text(review_text)
-        features = build_feature_matrix(
-            [processed_text],
-            [rating_value],
-            [price_value],
-            vectorizer,
-            scaler,
-        )
+        features = vectorizer.transform([processed_text])
         model = model_options[model_name]
         prediction = model.predict(features)[0]
         result = prediction_label(prediction)
@@ -152,8 +123,6 @@ def render_prediction_page(vectorizer, scaler, model_options):
                 [
                     {
                         "Review setelah preprocessing": processed_text or "(kosong)",
-                        "Rating": rating_value,
-                        "Price": price_value,
                     }
                 ]
             ),
@@ -267,7 +236,7 @@ st.set_page_config(
 )
 
 try:
-    vectorizer, scaler, model_options = load_artifacts()
+    vectorizer, model_options = load_artifacts()
 except FileNotFoundError as exc:
     st.error(str(exc))
     st.stop()
@@ -275,6 +244,6 @@ except FileNotFoundError as exc:
 page = st.sidebar.radio("Menu", ["Prediksi", "Evaluasi Model"])
 
 if page == "Prediksi":
-    render_prediction_page(vectorizer, scaler, model_options)
+    render_prediction_page(vectorizer, model_options)
 else:
     render_evaluation_page()

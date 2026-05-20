@@ -7,8 +7,6 @@ from pathlib import Path
 import joblib
 import numpy as np
 import pandas as pd
-from imblearn.over_sampling import SMOTE
-from imblearn.pipeline import Pipeline as ImbPipeline
 from sklearn.base import clone
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -23,9 +21,7 @@ from sklearn.metrics import (
 )
 from sklearn.model_selection import StratifiedKFold, cross_val_score, train_test_split
 from sklearn.naive_bayes import ComplementNB, MultinomialNB
-from sklearn.preprocessing import MinMaxScaler
 
-from feature_engineering import build_feature_matrix, parse_price, parse_rating
 from preprocessing import preprocess_text
 
 
@@ -34,13 +30,12 @@ DATASET_CSV = Path("preprocessed_data_ulasan.csv")
 MODEL_DIR = Path("models")
 
 VECTORIZER_PATH = MODEL_DIR / "tfidf_vectorizer.pkl"
-SCALER_PATH = MODEL_DIR / "feature_scaler.pkl"
 RF_MODEL_PATH = MODEL_DIR / "random_forest_model.pkl"
 NB_MODEL_PATH = MODEL_DIR / "naive_bayes_model.pkl"
 EVALUATION_JSON_PATH = MODEL_DIR / "evaluation_results.json"
 EVALUATION_CSV_PATH = MODEL_DIR / "evaluation_results.csv"
 
-MAIN_MODEL = "Random Forest"
+MAIN_MODEL = "Naive Bayes"
 
 TEXT_COLUMN_CANDIDATES = [
     "Review_Stemmed",
@@ -51,8 +46,6 @@ TEXT_COLUMN_CANDIDATES = [
     "Review",
     "review",
 ]
-RATING_COLUMN_CANDIDATES = ["Rating", "rating"]
-PRICE_COLUMN_CANDIDATES = ["price", "Price", "harga", "Harga"]
 TARGET_COLUMN_CANDIDATES = [
     "purchase_decision",
     "Purchase_Decision",
@@ -159,22 +152,6 @@ def normalize_label(series: pd.Series) -> pd.Series:
     return clean.isin(positive_values).astype(int)
 
 
-def prepare_dataset(df, text_column, rating_column, price_column, target_column):
-    prepared = df.copy()
-    prepared["teks_bersih"] = prepared[text_column].apply(list_to_sentence).apply(preprocess_text)
-    prepared["rating_numeric"] = prepared[rating_column].apply(parse_rating).clip(lower=1, upper=5)
-    prepared["price_numeric"] = prepared[price_column].apply(parse_price).clip(lower=0)
-    prepared["target"] = normalize_label(prepared[target_column])
-
-    valid_rows = (
-        (prepared["teks_bersih"].str.strip() != "")
-        & prepared["rating_numeric"].notna()
-        & prepared["price_numeric"].notna()
-    )
-    prepared = prepared[valid_rows].reset_index(drop=True)
-    return prepared
-
-
 def positive_scores(model, X):
     if not hasattr(model, "predict_proba"):
         return None
@@ -188,8 +165,7 @@ def evaluate_model(family, model_name, parameters, model, X_test, y_test):
     y_score = positive_scores(model, X_test)
     labels = [0, 1]
     tn, fp, fn, tp = confusion_matrix(y_test, y_pred, labels=labels).ravel()
-
-    result = {
+    return {
         "family": family,
         "model": model_name,
         "parameters": parameters,
@@ -213,19 +189,12 @@ def evaluate_model(family, model_name, parameters, model, X_test, y_test):
             zero_division=0,
         ),
     }
-    return result
 
 
-def cross_validate_with_smote(model, X_train, y_train):
-    pipeline = ImbPipeline(
-        [
-            ("smote", SMOTE(random_state=42)),
-            ("model", clone(model)),
-        ]
-    )
+def cross_validate_model(model, X_train, y_train):
     cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
     scores = cross_val_score(
-        pipeline,
+        clone(model),
         X_train,
         y_train,
         cv=cv,
@@ -269,7 +238,7 @@ def train_best_random_forest(X_train, X_test, y_train, y_test):
             best_model = model
             best_result = result
 
-    best_result["cross_validation"] = cross_validate_with_smote(best_model, X_train, y_train)
+    best_result["cross_validation"] = cross_validate_model(best_model, X_train, y_train)
     print(
         "Random Forest terbaik: "
         f"{best_result['model']}, F1={best_result['f1_score']:.4f}, "
@@ -299,7 +268,7 @@ def train_best_naive_bayes(X_train, X_test, y_train, y_test):
             best_model = model
             best_result = result
 
-    best_result["cross_validation"] = cross_validate_with_smote(best_model, X_train, y_train)
+    best_result["cross_validation"] = cross_validate_model(best_model, X_train, y_train)
     print(
         "Naive Bayes terbaik: "
         f"{best_result['model']}, F1={best_result['f1_score']:.4f}, "
@@ -328,7 +297,7 @@ def save_evaluation(best_results, all_results, dataset_info):
     payload = {
         "generated_at": datetime.now().isoformat(timespec="seconds"),
         "main_model": MAIN_MODEL,
-        "feature_set": ["Review TF-IDF", "Rating", "Price log1p"],
+        "feature_set": ["Review TF-IDF"],
         "preprocessing": [
             "case folding",
             "cleaning URL/simbol/angka",
@@ -338,9 +307,8 @@ def save_evaluation(best_results, all_results, dataset_info):
         ],
         "split": {"train": "80%", "test": "20%", "random_state": 42},
         "imbalance_handling": {
-            "method": "SMOTE",
-            "applied_to": "training set setelah split",
-            "random_state": 42,
+            "method": "class_weight='balanced' pada Random Forest",
+            "applied_to": "Random Forest sebagai pembanding",
         },
         "dataset": dataset_info,
         "best_results": best_results,
@@ -378,34 +346,24 @@ def main():
     print(f"Kolom ditemukan: {list(df.columns)}")
 
     text_column = find_column(df.columns, TEXT_COLUMN_CANDIDATES, "teks ulasan")
-    rating_column = find_column(df.columns, RATING_COLUMN_CANDIDATES, "rating")
-    price_column = find_column(df.columns, PRICE_COLUMN_CANDIDATES, "price")
     target_column = find_column(df.columns, TARGET_COLUMN_CANDIDATES, "label/target")
-
     print(f"Kolom teks ulasan: {text_column}")
-    print(f"Kolom rating: {rating_column}")
-    print(f"Kolom price: {price_column}")
     print(f"Kolom label target: {target_column}")
     print("Format label target:")
     print(df[target_column].astype(str).str.strip().value_counts(dropna=False).to_string())
 
-    prepared = prepare_dataset(df, text_column, rating_column, price_column, target_column)
+    prepared = df.copy()
+    prepared["teks_bersih"] = prepared[text_column].apply(list_to_sentence).apply(preprocess_text)
+    prepared["target"] = normalize_label(prepared[target_column])
+    prepared = prepared[prepared["teks_bersih"].str.strip() != ""].reset_index(drop=True)
     y = prepared["target"]
+
     print(f"Baris valid setelah preprocessing: {prepared.shape[0]:,}")
     print("Distribusi target setelah normalisasi:")
     print(y.value_counts().rename(index={0: "TIDAK BELI", 1: "BELI"}).to_string())
 
     vectorizer = TfidfVectorizer(max_features=5000, ngram_range=(1, 2), min_df=2)
-    scaler = MinMaxScaler(clip=True)
-    X = build_feature_matrix(
-        prepared["teks_bersih"],
-        prepared["rating_numeric"],
-        prepared["price_numeric"],
-        vectorizer,
-        scaler,
-        fit_vectorizer=True,
-        fit_scaler=True,
-    )
+    X = vectorizer.fit_transform(prepared["teks_bersih"])
 
     X_train, X_test, y_train, y_test = train_test_split(
         X,
@@ -414,30 +372,24 @@ def main():
         random_state=42,
     )
 
-    print(f"Ukuran training set sebelum SMOTE: {X_train.shape}")
+    print(f"Ukuran training set: {X_train.shape}")
     print(f"Ukuran testing set: {X_test.shape}")
-    smote = SMOTE(random_state=42)
-    X_train_balanced, y_train_balanced = smote.fit_resample(X_train, y_train)
-    print(f"Ukuran training set setelah SMOTE: {X_train_balanced.shape}")
-    print("Distribusi target training setelah SMOTE:")
-    print(y_train_balanced.value_counts().rename(index={0: "TIDAK BELI", 1: "BELI"}).to_string())
 
     random_forest, rf_best_result, rf_results = train_best_random_forest(
-        X_train_balanced,
+        X_train,
         X_test,
-        y_train_balanced,
+        y_train,
         y_test,
     )
     naive_bayes, nb_best_result, nb_results = train_best_naive_bayes(
-        X_train_balanced,
+        X_train,
         X_test,
-        y_train_balanced,
+        y_train,
         y_test,
     )
 
     MODEL_DIR.mkdir(exist_ok=True)
     joblib.dump(vectorizer, VECTORIZER_PATH)
-    joblib.dump(scaler, SCALER_PATH)
     joblib.dump(random_forest, RF_MODEL_PATH)
     joblib.dump(naive_bayes, NB_MODEL_PATH)
 
@@ -445,18 +397,15 @@ def main():
         "source_rows": int(df.shape[0]),
         "valid_rows": int(prepared.shape[0]),
         "text_column": text_column,
-        "rating_column": rating_column,
-        "price_column": price_column,
         "target_column": target_column,
         "matrix_shape": list(X.shape),
-        "train_shape_before_smote": list(X_train.shape),
-        "train_shape_after_smote": list(X_train_balanced.shape),
+        "train_shape": list(X_train.shape),
         "test_shape": list(X_test.shape),
     }
     save_evaluation(
         best_results={
-            "Random Forest": rf_best_result,
             "Naive Bayes": nb_best_result,
+            "Random Forest": rf_best_result,
         },
         all_results=nb_results + rf_results,
         dataset_info=dataset_info,
@@ -464,9 +413,8 @@ def main():
 
     print("Model dan evaluasi berhasil disimpan:")
     print(f"- {VECTORIZER_PATH}")
-    print(f"- {SCALER_PATH}")
-    print(f"- {RF_MODEL_PATH} ({MAIN_MODEL}, model utama)")
-    print(f"- {NB_MODEL_PATH} (model pembanding)")
+    print(f"- {NB_MODEL_PATH} ({MAIN_MODEL}, model utama)")
+    print(f"- {RF_MODEL_PATH} (model pembanding)")
     print(f"- {EVALUATION_JSON_PATH}")
     print(f"- {EVALUATION_CSV_PATH}")
 
